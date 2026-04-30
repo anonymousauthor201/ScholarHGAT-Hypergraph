@@ -1,8 +1,6 @@
 """
-build_recommendation_inputs.py  (v2-compatible)
-================================================
 Generates all inputs needed by team_recommendation.py
-from a trained scholar_hgat_v2.py model.
+from a trained scholarhgat model.
 
 Produces:
   checkpoints/scores.npy               — (n_scholars,) global ranking scores
@@ -17,13 +15,6 @@ Score computation:
   s_c = (1/|S_ref|) sum_{s in S_ref} score_all(emb, s)[c]
   Mean TransE score over n_ref sampled reference scholars.
 
-Usage:
-  python build_recommendation_inputs.py \\
-      --data_dir   training_data_v2/ \\
-      --model_path checkpoints/best_model.pt \\
-      --hgat_path  scholar_hgat_v2.py \\
-      --scoring    transe \\
-      --save_dir   checkpoints/
 """
 
 import os
@@ -34,11 +25,6 @@ import numpy as np
 import scipy.sparse as sp
 
 import torch
-
-
-# ─────────────────────────────────────────────────────────────
-#  v2 type registries  (mirrors scholar_hgat_v2.py exactly)
-# ─────────────────────────────────────────────────────────────
 
 NODE_TYPE_LIST = ["scholar", "paper", "award", "institution",
                   "keyword", "venue", "nsf_program", "nsf_division"]
@@ -115,7 +101,7 @@ def normalise_id_map(raw: dict) -> dict:
 
 
 # ─────────────────────────────────────────────────────────────
-#  1. Data Loading  (v2 format)
+#  1. Data Loading
 # ─────────────────────────────────────────────────────────────
 
 def load_data_v2(data_dir, device, add_self_loops=False):
