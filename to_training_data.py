@@ -1,8 +1,4 @@
 """
-to_training_data.py
-====================
-Converts ScholarHypergraph output → PyTorch Geometric training-ready files.
-
 Output files:
   H.npz            - Incidence matrix (N nodes × M hyperedges), scipy sparse CSR
   X.npy            - Node feature matrix (N × F), float32
@@ -14,15 +10,6 @@ Output files:
     val_pairs.npy    - Validation pairs
     test_pairs.npy   - Test pairs
     neg_pairs.npy    - Hard negative pairs (same keyword/venue but no award collab)
-
-Usage:
-  from hypergraph_builder import ScholarHypergraph
-  from to_training_data import to_training_data
-
-  hg = ScholarHypergraph()
-  hg.add_scholar_from_file("scholar1.json")
-  hg.build()
-  to_training_data(hg, save_dir="training_data/")
 """
 
 import os
@@ -34,21 +21,12 @@ import scipy.sparse as sp
 from collections import defaultdict
 from typing import Optional
 
-# Optional: sentence-transformers for keyword embedding
 try:
     from sentence_transformers import SentenceTransformer
     HAS_SBERT = True
 except ImportError:
     HAS_SBERT = False
 
-
-# ─────────────────────────────────────────────────────────────
-#  Positive-pair source configuration
-#  Modify here to add / remove sources or change sampling caps.
-# ─────────────────────────────────────────────────────────────
-
-# Each entry: hedge_type_prefix → max pairs to keep (None = keep all)
-# Priority order matters for deduplication: award > pub > prog
 POSITIVE_SOURCES = {
     "award_team"              : None,   # ~1,736  — strongest signal, keep all
     "publication_coauthorship": None,   # ~51,766 — true co-authorship, keep all
