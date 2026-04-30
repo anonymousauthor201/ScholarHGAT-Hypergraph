@@ -1,8 +1,4 @@
 """
-nsf_team_eval.py 
-==============================
-NSF Ground-Truth Evaluation for QD-DASTF Team Recommendation.
-
 Metrics:
   - Precision@k, Recall@k, F1@k
   - Jaccard similarity
@@ -16,13 +12,6 @@ Baselines:
   - TopK      : top-k by raw activity/embedding score (greedy, no diversity)
   - Ours      : QD-DASTF full pipeline
 
-Usage:
-    python nsf_team_eval.py \
-        --profiles_path ../../../combined_author_data_2025 \
-        --emb_path ../checkpoints_newdata_no_norm/scholar_embeddings.npy \
-        --data_dir ../training_data_v2/ \
-        --save_dir checkpoints_team/ \
-        --k 5 --n_eval 200 --output eval_results.json
 """
 
 import os, json, argparse, glob
