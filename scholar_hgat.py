@@ -1,8 +1,4 @@
 """
-scholar_hgat.py
-===============
-HGAT + Type-specific Attention + Temporal Decay + Scholar Attribute Encoder
-
 Architecture:
   1. ScholarAttrEncoder  : per-node-type MLP, maps raw features → dense embedding
   2. HGATConv            : one hypergraph attention layer (node→hedge→node)
@@ -10,12 +6,6 @@ Architecture:
   3. TemporalDecay       : reweights hedge contributions by recency
   4. ScholarHGAT         : full model stacking the above
 
-Training:
-  - Self-supervised via BPR loss on award_team / publication_coauthorship pairs
-  - No manual labels needed
-
-Usage:
-  python scholar_hgat.py --data_dir training_data/ --epochs 100
 """
 
 import os
@@ -35,7 +25,6 @@ from torch.optim import Adam
 
 # ─────────────────────────────────────────────────────────────
 #  1. Scholar Attribute Encoder
-#     Different node types get different MLP projections
 # ─────────────────────────────────────────────────────────────
 
 class ScholarAttrEncoder(nn.Module):
@@ -113,7 +102,6 @@ class ScholarAttrEncoder(nn.Module):
 
 # ─────────────────────────────────────────────────────────────
 #  2. Temporal Decay
-#     More recent hyperedges get higher attention weight
 # ─────────────────────────────────────────────────────────────
 
 class TemporalDecay(nn.Module):
@@ -159,8 +147,6 @@ class TemporalDecay(nn.Module):
 
 # ─────────────────────────────────────────────────────────────
 #  3. HGAT Convolution Layer
-#     node → hedge aggregation (with type-specific attention)
-#     hedge → node aggregation (with temporal decay)
 # ─────────────────────────────────────────────────────────────
 
 HEDGE_TYPES = [
@@ -328,13 +314,8 @@ class HGATConv(nn.Module):
 #  4. Full Model
 # ─────────────────────────────────────────────────────────────
 
-# Relation names in canonical order — single source of truth.
-# All weight/vector lookups use this list to guarantee alignment.
 RELATION_NAMES = ["award", "paper", "keyword"]
 
-# Initial weight prior: award > paper > keyword (before softmax).
-# Reflects domain knowledge: shared awards = strongest collaboration signal.
-# These are starting values only; all three are learned during training.
 RELATION_INIT_WEIGHTS = {"award": 1.0, "paper": 0.7, "keyword": 0.3}
 
 class ScholarHGAT(nn.Module):
@@ -461,7 +442,7 @@ class ScholarHGAT(nn.Module):
 
 
 # ─────────────────────────────────────────────────────────────
-#  5. Margin Ranking Loss (Eq. 6)
+#  5. Margin Ranking Loss
 # ─────────────────────────────────────────────────────────────
 
 def margin_loss(model, emb, pos_pairs, neg_pairs, activity_scores=None, margin=1.0):
@@ -599,7 +580,7 @@ def _extract_hedge_info(id_map, meta):
 
 
 # ─────────────────────────────────────────────────────────────
-#  7. Evaluation: Recall@K, NDCG@K  (with inference timing)
+#  7. Evaluation: Recall@K, NDCG@K
 # ─────────────────────────────────────────────────────────────
 
 @torch.no_grad()
@@ -887,8 +868,8 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir",   default="training_data/")
     parser.add_argument("--save_dir",   default="checkpoints/")
     parser.add_argument("--hidden_dim", type=int,   default=128)
-    parser.add_argument("--output_dim", type=int,   default=128)   # ← changed: 64 → 128
-    parser.add_argument("--num_layers", type=int,   default=3)     # ← changed: 2 → 3
+    parser.add_argument("--output_dim", type=int,   default=128) 
+    parser.add_argument("--num_layers", type=int,   default=3)    
     parser.add_argument("--num_heads",  type=int,   default=4)
     parser.add_argument("--dropout",    type=float, default=0.1)
     parser.add_argument("--lr",         type=float, default=1e-3)
